@@ -1,54 +1,42 @@
+<xaiArtifact artifactid="f64f1c62-7f2e-427b-bc55-b7028e8dd2a9" artifactversionid="fbff0ee5-603c-4325-94e6-beb5d91c3464" title="index.html" contentType="text/html">
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body { background-color: #000000; color: #FFFFFF; font-family: Arial; text-align: center; }
-    .avatar { width: 100px; height: 100px; border-radius: 50%; border: 2px solid #FFFFFF; }
-    .username { font-size: 24px; margin: 10px 0; }
-    .stats { display: flex; justify-content: center; gap: 10px; }
-    .card { background-color: #FFFFFF; color: #000000; padding: 10px; border-radius: 10px; }
-    .green { color: #00FF00; }
-    .pink { color: #FF00FF; }
-  </style>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <img src="default_avatar.jpg" class="avatar">
-  <div class="username">Loading...</div>
-  <div class="stats">
-    <div class="card"><span class="green">100K</span><br>Остаток TON</div>
-    <div class="card"><span class="pink">0.00:06</span><br>Время игры</div>
-  </div>
-
-  <script>
-    window.Telegram.WebApp.ready();
-    const user = window.Telegram.WebApp.initDataUnsafe.user || {};
-    const userId = user.id || null;
-    const username = user.username || "Unknown";
-
-    document.querySelector(".username").textContent = username;
-
-    async function getUserAvatar(userId) {
-      if (!userId) return "default_avatar.jpg";
-      const botToken = "7042496389:AAH7smE20f1G5uAtF9ZB7JcdJZLPqvMGIVM"; 
-      try {
-        const response = await fetch(`https://api.telegram.org/bot${botToken}/getUserProfilePhotos?user_id=${userId}`);
-        const data = await response.json();
-        if (data.ok && data.result.photos.length > 0) {
-          const photo = data.result.photos[0][0].file_id;
-          const fileResponse = await fetch(`https://api.telegram.org/bot${botToken}/getFile?file_id=${photo}`);
-          const fileData = await fileResponse.json();
-          return `https://api.telegram.org/file/bot${botToken}/${fileData.result.file_path}`;
-        }
-      } catch (error) {
-        console.error("Ошибка:", error);
-      }
-      return "default_avatar.jpg";
-    }
-
-    getUserAvatar(userId).then(avatarUrl => {
-      document.querySelector(".avatar").src = avatarUrl;
-    });
-  </script>
+<div id="profile-page">
+<img src="defaultavatar.jpg" class="avatar">
+<div class="username">Loading...</div>
+<div class="stats">
+<div class="card"><span class="green">0</span><br>Остаток TON</div>
+<div class="card"><span class="pink">недосупно</span><br>Время игры</div>
+</div>
+</div>
+<div class="navbar">
+<button class="nav-button" onclick="navigate('home')">Главная</button>
+<button class="nav-button" onclick="navigate('play')">Играть</button>
+<button class="nav-button profile active" onclick="navigate('profile')">Профиль</button>
+</div>
+<script>
+window.Telegram.WebApp.ready();
+const user = window.Telegram.WebApp.initDataUnsafe.user || {};
+const userId = user.id || null;
+const username = user.username || "Unknown";
+document.querySelector(".username").textContent = username;
+async function getUserAvatar(userId) {
+if (!userId) return "defaultavatar.jpg";
+const botToken = "7042496389:AAH7smE20f1G5uAtF9ZB7JcdJZLPqvMGIVM"; // Замени на токен бота
+try {
+const response = await fetch(`https://api.telegram.org/bot${botToken}/getUserProfilePhotos?userid=${userId});
+const data = await response.json();
+if (data.ok && data.result.photos.length > 0) {
+const photo = data.result.photos[0][0].file_id;
+const fileResponse = await fetch(https://api.telegram.org/bot${botToken}/getFile?fileid=${photo}`);
+}
+}
+</script>
 </body>
 </html>
+</xaiArtifact>
