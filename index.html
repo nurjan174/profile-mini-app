@@ -1,18 +1,23 @@
    <!DOCTYPE html>
-   <html lang="en">
-   <head>
-     <meta charset="UTF-8">
-     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <title>Profile Mini App</title>
-     <link rel="stylesheet" href="styles.css">
-   </head>
-   <body>
-     <div class="container">
-       <img id="photo" width="100" alt="Profile Photo">
-       <p id="username"></p>
-     </div>
-     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-     <script src="script.js"></script>
-   </body>
-   </html>
+<html>
+<head>
+  <style>
+    body { background-color: #000000; color: #FFFFFF; font-family: Arial; text-align: center; }
+    .avatar { width: 100px; height: 100px; border-radius: 50%; border: 2px solid #FFFFFF; }
+    .username { font-size: 24px; margin: 10px 0; }
+    .stats { display: flex; justify-content: center; gap: 10px; }
+    .card { background-color: #FFFFFF; color: #000000; padding: 10px; border-radius: 10px; }
+    .green { color: #00FF00; }
+    .pink { color: #FF00FF; }
+  </style>
+</head>
+<body>
+  <img src="avatar.jpg" class="avatar">
+  <div class="username">nurjan.tg</div>
+  <div class="stats">
+    <div class="card"><span class="green">100K</span><br>Остаток TON</div>
+    <div class="card"><span class="pink">0.00:06</span><br>Время игры</div>
+  </div>
+</body>
+</html>
    
