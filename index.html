@@ -1,4 +1,3 @@
-<xaiArtifact artifactid="f64f1c62-7f2e-427b-bc55-b7028e8dd2a9" artifactversionid="fbff0ee5-603c-4325-94e6-beb5d91c3464" title="index.html" contentType="text/html">
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,11 +6,11 @@
 </head>
 <body>
 <div id="profile-page">
-<img src="defaultavatar.jpg" class="avatar">
-<div class="username">Loading...</div>
+<img id="user-avatar" src="default_avatar.jpg" class="avatar">
+<div class="username" id="username">Loading...</div>
 <div class="stats">
-<div class="card"><span class="green">0</span><br>Остаток TON</div>
-<div class="card"><span class="pink">недосупно</span><br>Время игры</div>
+<div class="card"><span class="green">100K</span><br>Остаток TON</div>
+<div class="card"><span class="pink">0.00:06</span><br>Время игры</div>
 </div>
 </div>
 <div class="navbar">
@@ -23,18 +22,49 @@
 window.Telegram.WebApp.ready();
 const user = window.Telegram.WebApp.initDataUnsafe.user || {};
 const userId = user.id || null;
-const username = user.username || "Unknown";
-document.querySelector(".username").textContent = username;
+const username = user.username ? `@${user.username}` : "Unknown"; // Добавляем @ перед именем
+document.getElementById("username").textContent = username;
+
 async function getUserAvatar(userId) {
-if (!userId) return "defaultavatar.jpg";
-const botToken = "7042496389:AAH7smE20f1G5uAtF9ZB7JcdJZLPqvMGIVM"; // Замени на токен бота
-try {
-const response = await fetch(`https://api.telegram.org/bot${botToken}/getUserProfilePhotos?userid=${userId});
-const data = await response.json();
-if (data.ok && data.result.photos.length > 0) {
-const photo = data.result.photos[0][0].file_id;
-const fileResponse = await fetch(https://api.telegram.org/bot${botToken}/getFile?fileid=${photo}`);
+  const avatarElement = document.getElementById("user-avatar");
+  if (!userId) {
+    avatarElement.src = "default_avatar.jpg";
+    return;
+  }
+  const botToken = "7042496389:AAH7smE20f1G5uAtF9ZB7JcdJZLPqvMGIVM"; // Замени на реальный токен бота
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${botToken}/getUserProfilePhotos?user_id=${userId}`);
+    const data = await response.json();
+    if (data.ok && data.result.photos.length > 0) {
+      const photo = data.result.photos[0][0].file_id; // Берем первую доступную фотографию
+      const fileResponse = await fetch(`https://api.telegram.org/bot${botToken}/getFile?file_id=${photo}`);
+      const fileData = await fileResponse.json();
+      if (fileData.ok) {
+        const filePath = fileData.result.file_path;
+        avatarElement.src = `https://api.telegram.org/file/bot${botToken}/${filePath}`;
+      } else {
+        avatarElement.src = "default_avatar.jpg";
+      }
+    } else {
+      avatarElement.src = "default_avatar.jpg";
+    }
+  } catch (error) {
+    console.error("Ошибка загрузки аватара:", error);
+    avatarElement.src = "default_avatar.jpg";
+  }
 }
+
+getUserAvatar(userId);
+
+// Функция навигации (заглушка)
+function navigate(page) {
+  const profilePage = document.getElementById("profile-page");
+  if (page === "profile") {
+    profilePage.style.display = "block";
+  } else {
+    profilePage.style.display = "none";
+    alert(`Переход на страницу: ${page}`);
+  }
 }
 </script>
 </body>
