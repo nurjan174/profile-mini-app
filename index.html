@@ -1,142 +1,102 @@
-<!DOCTYPE html>
+DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaskMasters</title>
-  <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f0f2f5;
-      color: #333;
-    }
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-      color: #1a73e8;
-    }
-    .profile {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .profile img {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-bottom: 10px;
-    }
-    .profile p {
-      margin: 5px 0;
-      font-size: 16px;
-      font-weight: bold;
-    }
-    .balance {
-      text-align: center;
-      margin: 10px 0;
-      font-size: 18px;
-    }
-    .filters {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .filters select, .filters input {
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 14px;
-    }
-    .task-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .task-card {
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .task-card h3 {
-      margin: 0 0 10px;
-      color: #1a73e8;
-    }
-    .task-card p {
-      margin: 5px 0;
-    }
-    .task-card button {
-      background: #1a73e8;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .task-card button:hover {
-      background: #1557b0;
-    }
-    .create-task {
-      margin-bottom: 20px;
-    }
-    .create-task input, .create-task textarea {
-      width: 100%;
-      padding: 10px;
-      margin: 5px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    .create-task button {
-      background: #1a73e8;
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .create-task button:hover {
-      background: #1557b0;
-    }
-  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tma.js/sdk@2.2.2/dist/index.umd.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>TaskMasters</h1>
-    <div class="profile">
-      <img id="userAvatar" src="https://via.placeholder.com/80" alt="User Avatar">
-      <p id="username">Loading...</p>
-    </div>
-    <div class="balance">Balance: <span id="balance">0</span> Stars</div>
-    <button onclick="initiatePayment()">Top Up Balance</button>
-    <div class="create-task">
-      <h2>Create Task</h2>
-      <input id="taskTitle" placeholder="Task Title">
-      <textarea id="taskDescription" placeholder="Task Description"></textarea>
-      <input id="taskPrice" type="number" placeholder="Price in Stars">
-      <button onclick="createTask()">Post Task</button>
-    </div>
-    <div class="filters">
-      <select id="categoryFilter">
-        <option value="">All Categories</option>
-        <option value="Text">Text</option>
-        <option value="Design">Design</option>
-        <option value="Research">Research</option>
-      </select>
-      <input id="priceFilter" type="number" placeholder="Max Price">
-    </div>
-    <div class="task-list" id="taskList"></div>
-  </div>
-  <script>
-    // Initialize Telegram Web Apps
-    if (window.Telegram?.WebApp) {
-      Telegram.WebApp.ready();
-      const user = Telegram.WebApp.initDataUnsafe.user;
-      if (user) {
-        document.getElementById('username').innerText = user.username || user.firstname || 'User';
+  <div id="root"></div>
+  <script type="text/babel" data-presets="react,typescript">
+    // Initialize Telegram Web App
+    const { init } = window.TMA;
+    init();
+
+    // Sample task data
+    interface Task {
+      id: number;
+      title: string;
+      category: string;
+      price: number;
+      deadline: string;
+    }
+
+    const tasks: Task[] = [
+      { id: 1, title: "Набрать текст из фото", category: "Текст", price: 50, deadline: "15:00, 20 мая" },
+      { id: 2, title: "Найти контакты SMM-агентств", category: "Поиск", price: 100, deadline: "12:00, 21 мая" },
+    ];
+
+    // Task Card Component
+    const TaskCard: React.FC<{ task: Task }> = ({ task }) => {
+      return (
+        <div className="bg-white p-4 mb-4 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold">{task.title}</h3>
+          <p className="text-sm text-gray-600">Категория: {task.category}</p>
+          <p className="text-sm text-gray-600">Цена: ★{task.price}</p>
+          <p className="text-sm text-gray-600">Срок: {task.deadline}</p>
+          <button
+            className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            onClick={() => alert(`Взять задачу: ${task.title}`)}
+          >
+            Взять задачу
+          </button>
+        </div>
+      );
+    };
+
+    // Create Task Button Component
+    const CreateTaskButton: React.FC = () => {
+      const openForm = () => {
+        alert("Открыть форму создания задачи");
+        // Logic to navigate to task creation form
+      };
+
+      return (
+        <button
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          onClick={openForm}
+        >
+          ➕ Создать задачу
+        </button>
+      );
+    };
+
+    // Main App Component
+    const App: React.FC = () => {
+      return (
+        <div className="min-h-screen bg-gray-100 p-4">
+          {/* Header */}
+          <h1 className="text-2xl font-bold mb-4">TaskMasters</h1>
+
+          {/* Search and Filters */}
+          <div className="flex space-x-2 mb-4">
+            <button className="bg-gray-200 px-4 py-2 rounded">🔍 Поиск</button>
+            <button className="bg-gray-200 px-4 py-2 rounded">🎯 Фильтры</button>
+            <CreateTaskButton />
+          </div>
+
+          {/* Task Feed */}
+          <div className="mb-16">
+            {tasks.map((task) => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+          </div>
+
+          {/* Bottom Navigation */}
+          <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg flex justify-around py-2">
+            <button className="text-gray-600">🏠 Главная</button>
+            <button className="text-gray-600">💎 Кошелёк</button>
+            <button className="text-gray-600">📊 Рейтинг</button>
+            <button className="text-gray-600">👤 Профиль</button>
+          </div>
+        </div>
+      );
+    };
+
+    // Render the app
+    ReactDOM.render(<App />, document.getEleme
