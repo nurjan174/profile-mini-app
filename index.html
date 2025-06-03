@@ -1,102 +1,77 @@
-DOCTYPE html>
+<xaiArtifact artifact_id="f1ac41c5-758c-4f10-a322-678816680954" artifact_version_id="0767729b-58bf-49e1-8d7a-db69905b1371" title="index.html" contentType="text/html">
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaskMasters</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@tma.js/sdk@2.2.2/dist/index.umd.js"></script>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="text/babel" data-presets="react,typescript">
+  <div class="app-container">
+    <!-- Header -->
+    <h1 class="header">TaskMasters</h1>
+
+    <!-- Search and Filters -->
+    <div class="controls">
+      <button>🔍 Поиск</button>
+      <button>🎯 Фильтры</button>
+      <button class="create-task-btn">➕ Создать задачу</button>
+    </div>
+
+    <!-- Task Feed -->
+    <div class="task-feed" id="task-feed">
+      <!-- Tasks will be inserted here by JavaScript -->
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+      <button>🏠 Главная</button>
+      <button>💎 Кошелёк</button>
+      <button>📊 Рейтинг</button>
+      <button>👤 Профиль</button>
+    </div>
+  </div>
+
+  <script>
     // Initialize Telegram Web App
     const { init } = window.TMA;
     init();
 
     // Sample task data
-    interface Task {
-      id: number;
-      title: string;
-      category: string;
-      price: number;
-      deadline: string;
-    }
-
-    const tasks: Task[] = [
+    const tasks = [
       { id: 1, title: "Набрать текст из фото", category: "Текст", price: 50, deadline: "15:00, 20 мая" },
       { id: 2, title: "Найти контакты SMM-агентств", category: "Поиск", price: 100, deadline: "12:00, 21 мая" },
     ];
 
-    // Task Card Component
-    const TaskCard: React.FC<{ task: Task }> = ({ task }) => {
-      return (
-        <div className="bg-white p-4 mb-4 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold">{task.title}</h3>
-          <p className="text-sm text-gray-600">Категория: {task.category}</p>
-          <p className="text-sm text-gray-600">Цена: ★{task.price}</p>
-          <p className="text-sm text-gray-600">Срок: {task.deadline}</p>
-          <button
-            className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            onClick={() => alert(`Взять задачу: ${task.title}`)}
-          >
-            Взять задачу
-          </button>
-        </div>
-      );
-    };
+    // Function to render tasks
+    function renderTasks() {
+      const taskFeed = document.getElementById("task-feed");
+      taskFeed.innerHTML = ""; // Clear existing content
+      tasks.forEach(task => {
+        const taskCard = document.createElement("div");
+        taskCard.className = "task-card";
+        taskCard.innerHTML = `
+          <h3>${task.title}</h3>
+          <p>Категория: ${task.category}</p>
+          <p>Цена: ★${task.price}</p>
+          <p>Срок: ${task.deadline}</p>
+          <button onclick="alert('Взять задачу: ${task.title}')">Взять задачу</button>
+        `;
+        taskFeed.appendChild(taskCard);
+      });
+    }
 
-    // Create Task Button Component
-    const CreateTaskButton: React.FC = () => {
-      const openForm = () => {
-        alert("Открыть форму создания задачи");
-        // Logic to navigate to task creation form
-      };
+    // Handle Create Task button click
+    document.querySelector(".create-task-btn").addEventListener("click", () => {
+      alert("Открыть форму создания задачи");
+      // Add logic for task creation form here
+    });
 
-      return (
-        <button
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-          onClick={openForm}
-        >
-          ➕ Создать задачу
-        </button>
-      );
-    };
-
-    // Main App Component
-    const App: React.FC = () => {
-      return (
-        <div className="min-h-screen bg-gray-100 p-4">
-          {/* Header */}
-          <h1 className="text-2xl font-bold mb-4">TaskMasters</h1>
-
-          {/* Search and Filters */}
-          <div className="flex space-x-2 mb-4">
-            <button className="bg-gray-200 px-4 py-2 rounded">🔍 Поиск</button>
-            <button className="bg-gray-200 px-4 py-2 rounded">🎯 Фильтры</button>
-            <CreateTaskButton />
-          </div>
-
-          {/* Task Feed */}
-          <div className="mb-16">
-            {tasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
-            ))}
-          </div>
-
-          {/* Bottom Navigation */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg flex justify-around py-2">
-            <button className="text-gray-600">🏠 Главная</button>
-            <button className="text-gray-600">💎 Кошелёк</button>
-            <button className="text-gray-600">📊 Рейтинг</button>
-            <button className="text-gray-600">👤 Профиль</button>
-          </div>
-        </div>
-      );
-    };
-
-    // Render the app
-    ReactDOM.render(<App />, document.getEleme
+    // Initial render
+    renderTasks();
+  </script>
+</body>
+</html>
+</xaiArtifact>
