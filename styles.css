@@ -1,123 +1,93 @@
-```css
-/* styles.css */
-
-/* Global styles */
-body {
-  margin: 0;
+ margin: 0;
+  overflow: hidden;
+  background: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
   font-family: Arial, sans-serif;
-  background-color: #f1f5f9; /* Light gray background */
 }
 
-/* Main container */
-.app-container {
-  min-height: 100vh;
-  padding: 16px;
-  box-sizing: border-box;
+#gameCanvas {
+  display: block;
+  border: 2px solid #333;
+  background: #fff;
 }
 
-/* Header */
-.header {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 16px;
-  color: #1f2937; /* Dark gray text */
-}
-
-/* Search and Filters bar */
-.controls {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.controls button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  background-color: #e5e7eb; /* Gray for search/filter buttons */
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
-}
-
-.controls button:hover {
-  background-color: #d1d5db;
-}
-
-.create-task-btn {
-  background-color: #10b981; /* Green for create task button */
-  color: white;
-}
-
-.create-task-btn:hover {
-  background-color: #059669;
-}
-
-/* Task feed */
-.task-feed {
-  margin-bottom: 64px; /* Space for bottom navigation */
-}
-
-/* Task card */
-.task-card {
-  background-color: white;
-  padding: 16px;
-  margin-bottom: 16px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.task-card h3 {
+#status {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: #333;
   font-size: 18px;
-  font-weight: 600;
-  margin: 0 0 8px;
-  color: #1f2937;
+  font-weight: bold;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+</xaiArtifact>
+
+<xaiArtifact artifact_id="454ffae9-833b-45ba-8842-e043e8d9f324" artifact_version_id="4ce4a692-5a58-49b3-b36d-067ad943c2fe" title="script.js" contentType="text/javascript">
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = 400;
+canvas.height = 400;
+const squareSize = canvas.width / 8;
+let selectedPiece = null;
+let turn = 'black';
+let board = [
+  ['', 'b', '', 'b', '', 'b', '', 'b'],
+  ['b', '', 'b', '', 'b', '', 'b', ''],
+  ['', 'b', '', 'b', '', 'b', '', 'b'],
+  ['', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', ''],
+  ['w', '', 'w', '', 'w', '', 'w', ''],
+  ['', 'w', '', 'w', '', 'w', '', 'w'],
+  ['w', '', 'w', '', 'w', '', 'w', '']
+];
+
+function drawBoard() {
+  for (let y = 0; y < 8; y++) {
+    for (let x = 0; x < 8; x++) {
+      ctx.fillStyle = (x + y) % 2 === 0 ? '#fff' : '#555';
+      ctx.fillRect(x * squareSize, y * squareSize, squareSize, squareSize);
+      if (board[y][x]) {
+        ctx.fillStyle = board[y][x] === 'b' ? 'black' : 'white';
+        ctx.beginPath();
+        ctx.arc(x * squareSize + squareSize / 2, y * squareSize + squareSize / 2, squareSize / 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+  if (selectedPiece) {
+    ctx.strokeStyle = 'yellow';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(selectedPiece.x * squareSize, selectedPiece.y * squareSize, squareSize, squareSize);
+  }
 }
 
-.task-card p {
-  font-size: 14px;
-  color: #6b7280; /* Gray for secondary text */
-  margin: 4px 0;
+function getPiece(x, y) {
+  const file = Math.floor(x / squareSize);
+  const rank = Math.floor(y / squareSize);
+  return board[rank][file] ? { x: file, y: rank, piece: board[rank][file] } : null;
 }
 
-.task-card button {
-  margin-top: 8px;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  background-color: #3b82f6; /* Blue for take task button */
-  color: white;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
+function isValidMove(startX, startY, endX, endY) {
+  if ((Math.abs(endX - startX) === 1 && Math.abs(endY - startY) === 1) && !board[endY][endX]) {
+    return { valid: true, capture: false };
+  }
+  if (Math.abs(endX - startX) === 2 && Math.abs(endY - startY) === 2) {
+    const midX = (startX + endX) / 2;
+    const midY = (startY + endY) / 2;
+    if (!board[endY][endX] && board[midY][midX] && board[midY][midX].toLowerCase() !== turn[0]) {
+      return { valid: true, capture: true, midX, midY };
+    }
+  }
+  return { valid: false };
 }
 
-.task-card button:hover {
-  background-color: #2563eb;
-}
-
-/* Bottom navigation */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: white;
-  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: space-around;
-  padding: 8px 0;
-}
-
-.bottom-nav button {
-  background: none;
-  border: none;
-  font-size: 14px;
-  color: #6b7280;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.bottom-nav button:hover {
-  color: #1f2937;
-}
+canvas.addEventListener('click', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const pie
