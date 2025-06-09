@@ -1,79 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subway Surfers Mini App</title>
-    <style>
-        body { margin: 0; overflow: hidden; background: #000; }
-        canvas { width: 100%; height: 100vh; display: block; }
-        #score { position: absolute; top: 10px; left: 10px; color: white; font-size: 20px; font-family: Arial; }
-    </style>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chess Mini App</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #f0f0f0; }
+    #gameCanvas { display: block; }
+    #status { position: absolute; top: 10px; left: 10px; color: black; font-family: Arial; }
+  </style>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    <div id="score">Score: 0</div>
-    <script>
-        const WebApp = window.Telegram.WebApp;
-        WebApp.ready();
-        WebApp.expand();
+  <canvas id="gameCanvas"></canvas>
+  <div id="status">Turn: White</div>
+  <script>
+    const WebApp = window.Telegram.WebApp;
+    WebApp.ready();
+    WebApp.expand();
 
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 400;
+    canvas.height = 400;
+    const squareSize = canvas.width / 8;
+    let selectedPiece = null;
+    let board = [
+      ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+      ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+      ['', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', ''],
+      ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+      ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+    ];
+    let turn = 'white';
 
-        let score = 0;
-        let gameOver = false;
-        const lanes = [canvas.width / 4, canvas.width / 2, 3 * canvas.width / 4];
-        let playerLane = 1;
-        let playerY = canvas.height - 100;
-        let isJumping = false;
-        let isSliding = false;
-        let jumpHeight = 0;
-        let obstacles = [];
-        let coins = [];
-        let lastObstacle = 0;
-        let lastCoin = 0;
-
-        const playerWidth = 50;
-        const playerHeight = 80;
-        const obstacleWidth = 50;
-        const obstacleHeight = 80;
-        const coinSize = 20;
-        const speed = 5;
-
-        function spawnObstacle() {
-            const lane = lanes[Math.floor(Math.random() * 3)];
-            obstacles.push({ x: lane, y: -obstacleHeight, type: Math.random() > 0.5 ? 'train' : 'barrier' });
+    function drawBoard() {
+      for (let y = 0; y < 8; y++) {
+        for (let x = 0; x < 8; x++) {
+          ctx.fillStyle = (x + y) % 2 === 0 ? '#d18b47' : '#ffce9e';
+          ctx.fillRect(x * squareSize, y * squareSize, squareSize, squareSize);
+          if (board[y][x]) {
+            ctx.fillStyle = board[y][x] === board[y][x].toUpperCase() ? 'white' : 'black';
+            ctx.beginPath();
+            ctx.arc(x * squareSize + squareSize / 2, y * squareSize + squareSize / 2, squareSize / 3, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
+      }
+      if (selectedPiece) {
+        ctx.strokeStyle = 'yellow';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(selectedPiece.x * squareSize, selectedPiece.y * squareSize, squareSize, squareSize);
+      }
+    }
 
-        function spawnCoin() {
-            const lane = lanes[Math.floor(Math.random() * 3)];
-            coins.push({ x: lane, y: -coinSize });
-        }
+    function getPiece(x, y) {
+      const file = Math.floor(x / squareSize);
+      const rank = 7 - Math.floor(y / squareSize);
+      return board[rank][file] ? { x: file, y: rank, piece: board[rank][file] } : null;
+    }
 
-        function handleTouch(e) {
-            if (gameOver) return;
-            const touch = e.touches[0];
-            const startX = touch.clientX;
-            const startY = touch.clientY;
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const piece = getPiece(x, y);
 
-            function onTouchEnd(endEvent) {
-                const endX = endEvent.changedTouches[0].clientX;
-                const endY = endEvent.changedTouches[0].clientY;
-                const dx = endX - startX;
-                const dy = endY - startY;
+      if (!selectedPiece && piece && (piece.piece === piece.piece.toUpperCase()) === (turn === 'white')) {
+        selectedPiece = piece;
+      } else if (selectedPiece) {
+        board[selectedPiece.y][selectedPiece.x] = '';
+        board[7 - Math.floor(y / squareSize)][Math.floor(x / squareSize)] = selectedPiece.piece;
+        selectedPiece = null;
+        turn = turn === 'white' ? 'black' : 'white';
+        document.getElementById('status').innerText = `Turn: ${turn.charAt(0).toUpperCase() + turn.slice(1)}`;
+      }
+      drawBoard();
+    });
 
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    if (dx > 50 && playerLane > 0) playerLane--;
-                    else if (dx < -50 && playerLane < 2) playerLane++;
-                } else {
-                    if (dy < -50 && !isJumping && !isSliding) {
-                        isJumping = true;
-                        jumpHeight = 150;
-                    } else if (dy > 50 && !isJumping && !isSliding) {
-                        isSliding = true;
-                        setTimeout(() => isSliding = false, 500);
-                    }
+    drawBoard();
+  </script>
+</body>
+</html>
