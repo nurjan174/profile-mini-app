@@ -1,77 +1,79 @@
-<xaiArtifact artifact_id="f1ac41c5-758c-4f10-a322-678816680954" artifact_version_id="0767729b-58bf-49e1-8d7a-db69905b1371" title="index.html" contentType="text/html">
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TaskMasters</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/@tma.js/sdk@2.2.2/dist/index.umd.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subway Surfers Mini App</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; }
+        canvas { width: 100%; height: 100vh; display: block; }
+        #score { position: absolute; top: 10px; left: 10px; color: white; font-size: 20px; font-family: Arial; }
+    </style>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <div class="app-container">
-    <!-- Header -->
-    <h1 class="header">TaskMasters</h1>
+    <canvas id="gameCanvas"></canvas>
+    <div id="score">Score: 0</div>
+    <script>
+        const WebApp = window.Telegram.WebApp;
+        WebApp.ready();
+        WebApp.expand();
 
-    <!-- Search and Filters -->
-    <div class="controls">
-      <button>🔍 Поиск</button>
-      <button>🎯 Фильтры</button>
-      <button class="create-task-btn">➕ Создать задачу</button>
-    </div>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-    <!-- Task Feed -->
-    <div class="task-feed" id="task-feed">
-      <!-- Tasks will be inserted here by JavaScript -->
-    </div>
+        let score = 0;
+        let gameOver = false;
+        const lanes = [canvas.width / 4, canvas.width / 2, 3 * canvas.width / 4];
+        let playerLane = 1;
+        let playerY = canvas.height - 100;
+        let isJumping = false;
+        let isSliding = false;
+        let jumpHeight = 0;
+        let obstacles = [];
+        let coins = [];
+        let lastObstacle = 0;
+        let lastCoin = 0;
 
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-      <button>🏠 Главная</button>
-      <button>💎 Кошелёк</button>
-      <button>📊 Рейтинг</button>
-      <button>👤 Профиль</button>
-    </div>
-  </div>
+        const playerWidth = 50;
+        const playerHeight = 80;
+        const obstacleWidth = 50;
+        const obstacleHeight = 80;
+        const coinSize = 20;
+        const speed = 5;
 
-  <script>
-    // Initialize Telegram Web App
-    const { init } = window.TMA;
-    init();
+        function spawnObstacle() {
+            const lane = lanes[Math.floor(Math.random() * 3)];
+            obstacles.push({ x: lane, y: -obstacleHeight, type: Math.random() > 0.5 ? 'train' : 'barrier' });
+        }
 
-    // Sample task data
-    const tasks = [
-      { id: 1, title: "Набрать текст из фото", category: "Текст", price: 50, deadline: "15:00, 20 мая" },
-      { id: 2, title: "Найти контакты SMM-агентств", category: "Поиск", price: 100, deadline: "12:00, 21 мая" },
-    ];
+        function spawnCoin() {
+            const lane = lanes[Math.floor(Math.random() * 3)];
+            coins.push({ x: lane, y: -coinSize });
+        }
 
-    // Function to render tasks
-    function renderTasks() {
-      const taskFeed = document.getElementById("task-feed");
-      taskFeed.innerHTML = ""; // Clear existing content
-      tasks.forEach(task => {
-        const taskCard = document.createElement("div");
-        taskCard.className = "task-card";
-        taskCard.innerHTML = `
-          <h3>${task.title}</h3>
-          <p>Категория: ${task.category}</p>
-          <p>Цена: ★${task.price}</p>
-          <p>Срок: ${task.deadline}</p>
-          <button onclick="alert('Взять задачу: ${task.title}')">Взять задачу</button>
-        `;
-        taskFeed.appendChild(taskCard);
-      });
-    }
+        function handleTouch(e) {
+            if (gameOver) return;
+            const touch = e.touches[0];
+            const startX = touch.clientX;
+            const startY = touch.clientY;
 
-    // Handle Create Task button click
-    document.querySelector(".create-task-btn").addEventListener("click", () => {
-      alert("Открыть форму создания задачи");
-      // Add logic for task creation form here
-    });
+            function onTouchEnd(endEvent) {
+                const endX = endEvent.changedTouches[0].clientX;
+                const endY = endEvent.changedTouches[0].clientY;
+                const dx = endX - startX;
+                const dy = endY - startY;
 
-    // Initial render
-    renderTasks();
-  </script>
-</body>
-</html>
-</xaiArtifact>
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    if (dx > 50 && playerLane > 0) playerLane--;
+                    else if (dx < -50 && playerLane < 2) playerLane++;
+                } else {
+                    if (dy < -50 && !isJumping && !isSliding) {
+                        isJumping = true;
+                        jumpHeight = 150;
+                    } else if (dy > 50 && !isJumping && !isSliding) {
+                        isSliding = true;
+                        setTimeout(() => isSliding = false, 500);
+                    }
