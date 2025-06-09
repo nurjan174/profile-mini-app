@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chess Mini App</title>
+  <title>Checkers Mini App</title>
   <style>
     body { margin: 0; overflow: hidden; background: #f0f0f0; }
     #gameCanvas { display: block; }
@@ -13,7 +13,7 @@
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
-  <div id="status">Turn: White</div>
+  <div id="status">Turn: Black</div>
   <script>
     const WebApp = window.Telegram.WebApp;
     WebApp.ready();
@@ -25,25 +25,25 @@
     canvas.height = 400;
     const squareSize = canvas.width / 8;
     let selectedPiece = null;
+    let turn = 'black';
     let board = [
-      ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
-      ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+      ['', 'b', '', 'b', '', 'b', '', 'b'],
+      ['b', '', 'b', '', 'b', '', 'b', ''],
+      ['', 'b', '', 'b', '', 'b', '', 'b'],
       ['', '', '', '', '', '', '', ''],
       ['', '', '', '', '', '', '', ''],
-      ['', '', '', '', '', '', '', ''],
-      ['', '', '', '', '', '', '', ''],
-      ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-      ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+      ['w', '', 'w', '', 'w', '', 'w', ''],
+      ['', 'w', '', 'w', '', 'w', '', 'w'],
+      ['w', '', 'w', '', 'w', '', 'w', '']
     ];
-    let turn = 'white';
 
     function drawBoard() {
       for (let y = 0; y < 8; y++) {
         for (let x = 0; x < 8; x++) {
-          ctx.fillStyle = (x + y) % 2 === 0 ? '#d18b47' : '#ffce9e';
+          ctx.fillStyle = (x + y) % 2 === 0 ? '#fff' : '#555';
           ctx.fillRect(x * squareSize, y * squareSize, squareSize, squareSize);
           if (board[y][x]) {
-            ctx.fillStyle = board[y][x] === board[y][x].toUpperCase() ? 'white' : 'black';
+            ctx.fillStyle = board[y][x] === 'b' ? 'black' : 'white';
             ctx.beginPath();
             ctx.arc(x * squareSize + squareSize / 2, y * squareSize + squareSize / 2, squareSize / 3, 0, Math.PI * 2);
             ctx.fill();
@@ -59,7 +59,7 @@
 
     function getPiece(x, y) {
       const file = Math.floor(x / squareSize);
-      const rank = 7 - Math.floor(y / squareSize);
+      const rank = Math.floor(y / squareSize);
       return board[rank][file] ? { x: file, y: rank, piece: board[rank][file] } : null;
     }
 
@@ -69,14 +69,19 @@
       const y = e.clientY - rect.top;
       const piece = getPiece(x, y);
 
-      if (!selectedPiece && piece && (piece.piece === piece.piece.toUpperCase()) === (turn === 'white')) {
+      if (!selectedPiece && piece && piece.piece === turn[0]) {
         selectedPiece = piece;
       } else if (selectedPiece) {
-        board[selectedPiece.y][selectedPiece.x] = '';
-        board[7 - Math.floor(y / squareSize)][Math.floor(x / squareSize)] = selectedPiece.piece;
+        const newX = Math.floor(x / squareSize);
+        const newY = Math.floor(y / squareSize);
+        // Простая проверка диагонального хода
+        if ((Math.abs(newX - selectedPiece.x) === 1 && Math.abs(newY - selectedPiece.y) === 1) && !board[newY][newX]) {
+          board[selectedPiece.y][selectedPiece.x] = '';
+          board[newY][newX] = selectedPiece.piece;
+          turn = turn === 'black' ? 'white' : 'black';
+          document.getElementById('status').innerText = `Turn: ${turn.charAt(0).toUpperCase() + turn.slice(1)}`;
+        }
         selectedPiece = null;
-        turn = turn === 'white' ? 'black' : 'white';
-        document.getElementById('status').innerText = `Turn: ${turn.charAt(0).toUpperCase() + turn.slice(1)}`;
       }
       drawBoard();
     });
