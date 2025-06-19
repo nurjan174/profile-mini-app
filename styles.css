@@ -1,93 +1,66 @@
- margin: 0;
-  overflow: hidden;
-  background: #f0f0f0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  font-family: Arial, sans-serif;
-}
-
-#gameCanvas {
-  display: block;
-  border: 2px solid #333;
-  background: #fff;
-}
-
-#status {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  color: #333;
-  font-size: 18px;
-  font-weight: bold;
-  background: rgba(255, 255, 255, 0.8);
-  padding: 5px 10px;
-  border-radius: 5px;
-}
-</xaiArtifact>
-
-<xaiArtifact artifact_id="454ffae9-833b-45ba-8842-e043e8d9f324" artifact_version_id="4ce4a692-5a58-49b3-b36d-067ad943c2fe" title="script.js" contentType="text/javascript">
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-canvas.width = 400;
-canvas.height = 400;
-const squareSize = canvas.width / 8;
-let selectedPiece = null;
-let turn = 'black';
-let board = [
-  ['', 'b', '', 'b', '', 'b', '', 'b'],
-  ['b', '', 'b', '', 'b', '', 'b', ''],
-  ['', 'b', '', 'b', '', 'b', '', 'b'],
-  ['', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', ''],
-  ['w', '', 'w', '', 'w', '', 'w', ''],
-  ['', 'w', '', 'w', '', 'w', '', 'w'],
-  ['w', '', 'w', '', 'w', '', 'w', '']
-];
-
-function drawBoard() {
-  for (let y = 0; y < 8; y++) {
-    for (let x = 0; x < 8; x++) {
-      ctx.fillStyle = (x + y) % 2 === 0 ? '#fff' : '#555';
-      ctx.fillRect(x * squareSize, y * squareSize, squareSize, squareSize);
-      if (board[y][x]) {
-        ctx.fillStyle = board[y][x] === 'b' ? 'black' : 'white';
-        ctx.beginPath();
-        ctx.arc(x * squareSize + squareSize / 2, y * squareSize + squareSize / 2, squareSize / 3, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-  }
-  if (selectedPiece) {
-    ctx.strokeStyle = 'yellow';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(selectedPiece.x * squareSize, selectedPiece.y * squareSize, squareSize, squareSize);
-  }
-}
-
-function getPiece(x, y) {
-  const file = Math.floor(x / squareSize);
-  const rank = Math.floor(y / squareSize);
-  return board[rank][file] ? { x: file, y: rank, piece: board[rank][file] } : null;
-}
-
-function isValidMove(startX, startY, endX, endY) {
-  if ((Math.abs(endX - startX) === 1 && Math.abs(endY - startY) === 1) && !board[endY][endX]) {
-    return { valid: true, capture: false };
-  }
-  if (Math.abs(endX - startX) === 2 && Math.abs(endY - startY) === 2) {
-    const midX = (startX + endX) / 2;
-    const midY = (startY + endY) / 2;
-    if (!board[endY][endX] && board[midY][midX] && board[midY][midX].toLowerCase() !== turn[0]) {
-      return { valid: true, capture: true, midX, midY };
-    }
-  }
-  return { valid: false };
-}
-
-canvas.addEventListener('click', (e) => {
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  const pie
+</style>
+</head>
+<body>
+    <header>
+        <h1>Добро пожаловать на мой сайт</h1>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="#home">Главная</a></li>
+            <li><a href="#about">О нас</a></li>
+            <li><a href="#services">Услуги</a></li>
+            <li><a href="#contact">Контакты</a>@nurjan_tg</li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section id="home">
+            <h2>Главная</h2>
+            <p>ты лох</p>
+            <a href="#about" class="button">лошара</a>
+        </section>
+        
+        <section id="about">
+            <h2>О нас</h2>
+            <p>Информация о вашей компании или проекте. Расскажите, чем вы занимаетесь и какие цели преследуете.</p>
+        </section>
+        
+        <section id="services">
+            <h2>Наши услуги</h2>
+            <div>
+                <h3>Услуга 1</h3>
+                <p>Описание первой услуги или продукта.</p>
+            </div>
+            <div>
+                <h3>Услуга 2</h3>
+                <p>скинь 100 stars на @nurjan_tg.</p>
+            </div>
+        </section>
+        
+        <section id="contact">
+            <h2>Контакты</h2>
+            <form>
+                <div>
+                    <label for="name">Имя:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div>
+                    <label for="message">Сообщение:</label>
+                    <textarea id="message" name="message" required></textarea>
+                </div>
+                <button type="submit" class="button">Отправить</button>
+            </form>
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; 2023 Мой сайт. Все права защищены.</p>
+    </footer>
+</body>
+</html>
+```
