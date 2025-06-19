@@ -1,92 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checkers Mini App</title>
-  <style>
-    body { margin: 0; overflow: hidden; background: #f0f0f0; }
-    #gameCanvas { display: block; }
-    #status { position: absolute; top: 10px; left: 10px; color: black; font-family: Arial; }
-  </style>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-</head>
-<body>
-  <canvas id="gameCanvas"></canvas>
-  <div id="status">Turn: Black</div>
-  <script>
-    const WebApp = window.Telegram.WebApp;
-    WebApp.ready();
-    WebApp.expand();
-
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = 400;
-    canvas.height = 400;
-    const squareSize = canvas.width / 8;
-    let selectedPiece = null;
-    let turn = 'black';
-    let board = [
-      ['', 'b', '', 'b', '', 'b', '', 'b'],
-      ['b', '', 'b', '', 'b', '', 'b', ''],
-      ['', 'b', '', 'b', '', 'b', '', 'b'],
-      ['', '', '', '', '', '', '', ''],
-      ['', '', '', '', '', '', '', ''],
-      ['w', '', 'w', '', 'w', '', 'w', ''],
-      ['', 'w', '', 'w', '', 'w', '', 'w'],
-      ['w', '', 'w', '', 'w', '', 'w', '']
-    ];
-
-    function drawBoard() {
-      for (let y = 0; y < 8; y++) {
-        for (let x = 0; x < 8; x++) {
-          ctx.fillStyle = (x + y) % 2 === 0 ? '#fff' : '#555';
-          ctx.fillRect(x * squareSize, y * squareSize, squareSize, squareSize);
-          if (board[y][x]) {
-            ctx.fillStyle = board[y][x] === 'b' ? 'black' : 'white';
-            ctx.beginPath();
-            ctx.arc(x * squareSize + squareSize / 2, y * squareSize + squareSize / 2, squareSize / 3, 0, Math.PI * 2);
-            ctx.fill();
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой сайт</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f4f4f4;
         }
-      }
-      if (selectedPiece) {
-        ctx.strokeStyle = 'yellow';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(selectedPiece.x * squareSize, selectedPiece.y * squareSize, squareSize, squareSize);
-      }
-    }
-
-    function getPiece(x, y) {
-      const file = Math.floor(x / squareSize);
-      const rank = Math.floor(y / squareSize);
-      return board[rank][file] ? { x: file, y: rank, piece: board[rank][file] } : null;
-    }
-
-    canvas.addEventListener('click', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const piece = getPiece(x, y);
-
-      if (!selectedPiece && piece && piece.piece === turn[0]) {
-        selectedPiece = piece;
-      } else if (selectedPiece) {
-        const newX = Math.floor(x / squareSize);
-        const newY = Math.floor(y / squareSize);
-        // Простая проверка диагонального хода
-        if ((Math.abs(newX - selectedPiece.x) === 1 && Math.abs(newY - selectedPiece.y) === 1) && !board[newY][newX]) {
-          board[selectedPiece.y][selectedPiece.x] = '';
-          board[newY][newX] = selectedPiece.piece;
-          turn = turn === 'black' ? 'white' : 'black';
-          document.getElementById('status').innerText = `Turn: ${turn.charAt(0).toUpperCase() + turn.slice(1)}`;
+        
+        header {
+            background: #35424a;
+            color: #ffffff;
+            padding: 20px 0;
+            text-align: center;
         }
-        selectedPiece = null;
-      }
-      drawBoard();
-    });
-
-    drawBoard();
-  </script>
-</body>
-</html>
+        
+        nav {
+            background: #e8491d;
+            padding: 10px;
+        }
+        
+        nav ul {
+            padding: 0;
+            list-style: none;
+            text-align: center;
+        }
+        
+        nav li {
+            display: inline;
+            margin: 0 15px;
+        }
+        
+        nav a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        main {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        section {
+            margin-bottom: 20px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #35424a;
+            color: #ffffff;
+        }
+        
+        .button {
+            display: inline-block;
+            background: #e8491d;
+            color: #ffffff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .button:hover {
+            background: #333333;
+        }
