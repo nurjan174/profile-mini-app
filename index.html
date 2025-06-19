@@ -3,78 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мой сайт</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            color: #333;
-            background-color: #f4f4f4;
-        }
-        
-        header {
-            background: #35424a;
-            color: #ffffff;
-            padding: 20px 0;
-            text-align: center;
-        }
-        
-        nav {
-            background: #e8491d;
-            padding: 10px;
-        }
-        
-        nav ul {
-            padding: 0;
-            list-style: none;
-            text-align: center;
-        }
-        
-        nav li {
-            display: inline;
-            margin: 0 15px;
-        }
-        
-        nav a {
-            color: #ffffff;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        main {
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        section {
-            margin-bottom: 20px;
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        footer {
-            text-align: center;
-            padding: 20px;
-            background: #35424a;
-            color: #ffffff;
-        }
-        
-        .button {
-            display: inline-block;
-            background: #e8491d;
-            color: #ffffff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        
-        .button:hover {
-            background: #333333;
-        }
+    <title>Онлайн шашки</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/game.js" defer></script>
+    <script src="js/telegram-web-app.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Шашки онлайн</h1>
+        <div id="game-status">Ожидание соперника...</div>
+        <div id="checkers-board"></div>
+        <div class="controls">
+            <button id="new-game-btn">Новая игра</button>
+            <button id="surrender-btn">Сдаться</button>
+        </div>
+        <div id="chat-container">
+            <div id="chat-messages"></div>
+            <input type="text" id="chat-input" placeholder="Введите сообщение...">
+            <button id="send-message-btn">Отправить</button>
+        </div>
+    </div>
+</body>
+</html>
