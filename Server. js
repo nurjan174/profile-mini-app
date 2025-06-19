@@ -1,1 +1,317 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 
+const app = express();
+app.use(bodyParser.json());
+app.use(cors());
+
+// Минимакс алгоритм для AI
+function findBestMove(gameState, depth) {
+    const possibleMoves = getAllPossibleMoves('black', gameState);
+    if (possibleMoves.length === 0) return null;
+    
+    let bestMove = null;
+    let bestValue = -Infinity;
+    
+    for (const move of possibleMoves) {
+        const tempState = simulateMove(move, JSON.parse(JSON.stringify(gameState)));
+        const moveValue = minimax(tempState, depth - 1, -Infinity, Infinity, false);
+        
+        if (moveValue > bestValue) {
+            bestValue = moveValue;
+            bestMove = move;
+        }
+    }
+    
+    return bestMove;
+}
+
+// Вспомогательные функции (аналогичные фронтенд-функциям)
+function minimax(state, depth, alpha, beta, isMaximizing) {
+    if (depth === 0 || isGameOver(state)) {
+        return evaluateBoard(state);
+    }
+    
+    const player = isMaximizing ? 'black' : 'white';
+    const possibleMoves = getAllPossibleMoves(player, state);
+    
+    if (isMaximizing) {
+        let maxEval = -Infinity;
+        
+        for (const move of possibleMoves) {
+            const tempState = simulateMove(move, state);
+            const eval = minimax(tempState, depth - 1, alpha, beta, false);
+            maxEval = Math.max(maxEval, eval);
+            alpha = Math.max(alpha, eval);
+            if (beta <= alpha) break;
+        }
+        
+        return maxEval;
+    } else {
+        let minEval = Infinity;
+        
+        for (const move of possibleMoves) {
+            const tempState = simulateMove(move, state);
+            const eval = minimax(tempState, depth - 1, alpha, beta, true);
+            minEval = Math.min(minEval, eval);
+            beta = Math.min(beta, eval);
+            if (beta <= alpha) break;
+        }
+        
+        return minEval;
+    }
+}
+
+function getAllPossibleMoves(player, state) {
+    const moves = [];
+    let mustCapture = false;
+    
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const piece = state.board[row][col];
+            if (piece && piece.type === player) {
+                const pieceMoves = getPossibleMoves(row, col, state);
+                if (pieceMoves.some(m => m.captures.length > 0)) {
+                    mustCapture = true;
+                    break;
+                }
+            }
+        }
+        if (mustCapture) break;
+    }
+    
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const piece = state.board[row][col];
+            if (piece && piece.type === player) {
+                const pieceMoves = getPossibleMoves(row, col, state);
+                
+                for (const move of pieceMoves) {
+                    if (!mustCapture || (mustCapture && move.captures.length > 0)) {
+                        moves.push({
+                            fromRow: row,
+                            fromCol: col,
+                            toRow: move.row,
+                            toCol: move.col,
+                            captures: move.captures
+                        });
+                    }
+                }
+            }
+        }
+    }
+    
+    return moves;
+}
+
+function getPossibleMoves(row, col, state) {
+    const piece = state.board[row][col];
+    if (!piece) return [];
+    
+    const moves = [];
+    const directions = piece.isKing ? 
+        [{row: -1, col: -1}, {row: -1, col: 1}, {row: 1, col: -1}, {row: 1, col: 1}] :
+        piece.type === 'white' ? 
+            [{row: -1, col: -1}, {row: -1, col: 1}] : 
+            [{row: 1, col: -1}, {row: 1, col: 1}];
+    
+    const mustCapture = checkMustCapture(piece.type, state);
+    
+    for (const dir of directions) {
+        let newRow = row + dir.row;
+        let newCol = col + dir.col;
+        
+        if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+            const target = state.board[newRow][newCol];
+            
+            if (!target) {
+                if (!mustCapture) {
+                    moves.push({ row: newRow, col: newCol, captures: [] });
+                }
+            } else if (target.type !== piece.type) {
+                const jumpRow = newRow + dir.row;
+                const jumpCol = newCol + dir.col;
+                
+                if (jumpRow >= 0 && jumpRow < 8 && jumpCol >= 0 && jumpCol < 8 && !state.board[jumpRow][jumpCol]) {
+                    moves.push({ 
+                        row: jumpRow, 
+                        col: jumpCol, 
+                        captures: [{row: newRow, col: newCol}]
+                    });
+                }
+            }
+        }
+    }
+    
+    if (piece.isKing) {
+        for (const dir of directions) {
+            let currentRow = row + dir.row;
+            let currentCol = col + dir.col;
+            let captured = null;
+            
+            while (currentRow >= 0 && currentRow < 8 && currentCol >= 0 && currentCol < 8) {
+                const target = state.board[currentRow][currentCol];
+                
+                if (!target) {
+                    if (captured) {
+                        moves.push({ 
+                            row: currentRow, 
+                            col: currentCol, 
+                            captures: [captured]
+                        });
+                    } else if (!mustCapture) {
+                        moves.push({ 
+                            row: currentRow, 
+                            col: currentCol, 
+                            captures: []
+                        });
+                    }
+                } else if (target.type === piece.type) {
+                    break;
+                } else {
+                    if (captured) break;
+                    captured = {row: currentRow, col: currentCol};
+                }
+                
+                currentRow += dir.row;
+                currentCol += dir.col;
+            }
+        }
+    }
+    
+    const captureMoves = moves.filter(m => m.captures.length > 0);
+    if (captureMoves.length > 0) {
+        return captureMoves;
+    }
+    
+    return moves;
+}
+
+function checkMustCapture(player, state) {
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const piece = state.board[row][col];
+            if (piece && piece.type === player) {
+                const moves = getPossibleMoves(row, col, state);
+                if (moves.some(m => m.captures.length > 0)) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+function simulateMove(move, state) {
+    const piece = state.board[move.fromRow][move.fromCol];
+    
+    state.board[move.toRow][move.toCol] = {...piece};
+    state.board[move.fromRow][move.fromCol] = null;
+    
+    if (!piece.isKing) {
+        if ((piece.type === 'white' && move.toRow === 0) || (piece.type === 'black' && move.toRow === 7)) {
+            state.board[move.toRow][move.toCol].isKing = true;
+        }
+    }
+    
+    move.captures.forEach(c => {
+        state.board[c.row][c.col] = null;
+    });
+    
+    const mustContinue = move.captures.length > 0 && 
+        getPossibleMoves(move.toRow, move.toCol, state).some(m => m.captures.length > 0);
+    
+    if (!mustContinue) {
+        state.currentPlayer = state.currentPlayer === 'white' ? 'black' : 'white';
+    }
+    
+    return state;
+}
+
+function evaluateBoard(state) {
+    let score = 0;
+    
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const piece = state.board[row][col];
+            if (!piece) continue;
+            
+            let pieceValue = piece.isKing ? 5 : 1;
+            
+            if (piece.type === 'black') {
+                score += pieceValue;
+                
+                if (row >= 3 && row <= 4 && col >= 2 && col <= 5) {
+                    score += 0.1;
+                }
+                
+                if (!piece.isKing) {
+                    score += (7 - row) * 0.05;
+                }
+            } else {
+                score -= pieceValue;
+                
+                if (row >= 3 && row <= 4 && col >= 2 && col <= 5) {
+                    score -= 0.1;
+                }
+                
+                if (!piece.isKing) {
+                    score -= row * 0.05;
+                }
+            }
+            
+            if (isProtected(row, col, state)) {
+                if (piece.type === 'black') score += 0.1;
+                else score -= 0.1;
+            }
+        }
+    }
+    
+    return score;
+}
+
+function isProtected(row, col, state) {
+    const piece = state.board[row][col];
+    if (!piece) return false;
+    
+    const directions = [{row: -1, col: -1}, {row: -1, col: 1}, {row: 1, col: -1}, {row: 1, col: 1}];
+    
+    for (const dir of directions) {
+        const backRow = row - dir.row;
+        const backCol = col - dir.col;
+        
+        if (backRow >= 0 && backRow < 8 && backCol >= 0 && backCol < 8) {
+            const backPiece = state.board[backRow][backCol];
+            if (backPiece && backPiece.type === piece.type) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
+function isGameOver(state) {
+    const whiteHasMoves = getAllPossibleMoves('white', state).length > 0;
+    const blackHasMoves = getAllPossibleMoves('black', state).length > 0;
+    return !whiteHasMoves || !blackHasMoves;
+}
+
+// API endpoint для получения хода бота
+app.post('/api/bot-move', (req, res) => {
+    const { gameState, difficulty } = req.body;
+    
+    try {
+        const bestMove = findBestMove(gameState, difficulty);
+        res.json({ success: true, move: bestMove });
+    } catch (error) {
+        console.error('Error calculating bot move:', error);
+        res.status(500).json({ success: false, error: 'Failed to calculate bot move' });
+    }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
